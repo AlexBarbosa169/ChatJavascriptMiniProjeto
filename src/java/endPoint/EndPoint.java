@@ -37,7 +37,7 @@ public class EndPoint {
     @OnOpen
     public void onOpen(Session ses,@PathParam("sala") String sala,@PathParam("usuario") String user) {        
 
-         
+        Config cfg; 
         if(!salas.containsKey(sala)){
             salas.put(sala, Collections.synchronizedList(new ArrayList<Session>()));                    
         }                    
@@ -60,18 +60,18 @@ public class EndPoint {
         
         salas.get(sala).add(ses);
         
-//        Gson gson = new Gson();                
-//        String str = gson.toJson(salas.get("geral").size());
-//
-//        List<String> teste = new ArrayList<>();
-//        teste.add("Teste");
-//        String srtteste = gson.toJson(teste);
-
-
-      for (Session s : salas.get(sala)) {
+        Gson gson = new Gson();                        
+        List<String> teste = new ArrayList<>();
+        teste.add("Teste");
+        teste.addAll(salas.keySet());        
+        cfg = new Config(teste,user,sala, user + " entrou na sala");
+        String srtteste = gson.toJson(cfg);
+        
+        for (Session s : salas.get(sala)) {
                 try {      
 //                s.getBasicRemote().sendText("usersInfo" + "Quantidade de usuários: " + chatUsers.size());                            
-                        s.getBasicRemote().sendText(ses.getUserProperties().get("name") + " conectou" + ", na sala "+ses.getUserProperties().get("sala")+"\n" );                        
+//                        s.getBasicRemote().sendText(ses.getUserProperties().get("name") + " conectou" + ", na sala "+ses.getUserProperties().get("sala")+"\n" );                        
+                          s.getBasicRemote().sendText(srtteste);                        
                 } catch (IOException ex) {
                     Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -82,8 +82,9 @@ public class EndPoint {
     public String onMessage(Session ses, String message) throws IOException {
 //        String username = (String) ses.getUserProperties().get("username");
         
+        String user = (String) ses.getUserProperties().get("name");
+        String sala = (String) ses.getUserProperties().get("sala");
         
-
         DateFormat df = new SimpleDateFormat("hh:mm:ss");
         Calendar cal = Calendar.getInstance();
         System.out.println(df.format(cal.getTime()));
@@ -97,14 +98,21 @@ public class EndPoint {
 //        Gson gson = new Gson();        
 //        String str = gson.toJson(ses.getUserProperties());
 //        String str = gson.toJson(df.format(cal.getTime()));
-
+            Config cfg; 
+            Gson gson = new Gson();                        
+            List<String> teste = new ArrayList<>();
+            teste.add("Teste");
+            teste.addAll(salas.keySet());        
+            cfg = new Config(teste,user,sala,"Usuário: "+ ses.getUserProperties().get("name")+" hora: "+ df.format(cal.getTime()) +" Mensagem: " + message + "\n");
+            String srtteste = gson.toJson(cfg);
 
         Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
             while (iterator.hasNext()) {
                 Session s = iterator.next();                        
     //            String st = gson.toJson(str);            
                 try {                        
-                    s.getBasicRemote().sendText("Usuário: "+ ses.getUserProperties().get("name")+" hora: "+ df.format(cal.getTime()) +" Mensagem: " + message + "\n");
+//                    s.getBasicRemote().sendText("Usuário: "+ ses.getUserProperties().get("name")+" hora: "+ df.format(cal.getTime()) +" Mensagem: " + message + "\n");
+                    s.getBasicRemote().sendText(srtteste);
                 } catch (IOException ex) {
                     Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -116,7 +124,11 @@ public class EndPoint {
     @OnClose
     public void onClose(Session ses) {
         String user = (String) ses.getUserProperties().get("name");
-        salas.get(ses.getUserProperties().get("sala")).remove(ses);
+        String sala = (String) ses.getUserProperties().get("sala");
+        salas.get(sala).remove(ses);
+        if(salas.get(sala).isEmpty()){
+            salas.remove(sala);
+        }
         Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
             while (iterator.hasNext()) {
                 Session s = iterator.next();                        

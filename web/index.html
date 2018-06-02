@@ -14,7 +14,7 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">       
     </head>
-    
+    <h1 id="titulo">Conecte-se</h1>
     <div id="form_login" class="container" style="visibility: visible">
             <form id="form">            
                 Url <input id="textUrl" type="text" value="ws://localhost:8080/ChatWebJavaJavascript/endpoint/">
@@ -29,14 +29,25 @@ and open the template in the editor.
             Novo nome <input id="textRename" type="text">                
             <input onclick="rename();" value="Renomear" type="button">                   
             <input onclick="disconect();" value="Desconectar" type="button" style="float: right">                            
-        </form>
-            <h1 id="titulo"></h1>
+        </form>            
             <p id="usersInfo">Número de usuários na sala</p>
-            <textarea id="messageTextArea" style="width: inherit; height: 300px " ></textarea>        
-            <form class="form">
+            <textarea id="messageTextArea" style="height: 300px;width: 400px; float: left "></textarea>        
+            <table  style="width: 300px; border: solid 1px; float: left">
+                <thead>
+                    <tr>
+                        <th>Sala</th>
+                        <th>Qtd Usuários na sala</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyTable">                    
+                    
+                </tbody>
+            </table>
+            <form class="form" style="clear: both">
                 <input id="textMessage" type="text" autocomplete="off">                        
                 <input onclick="sendMessage();" value="Enviar Mensagem" type="button">            
-            </form>    
+            </form>                
+
     </div>
         
                         
@@ -60,25 +71,22 @@ and open the template in the editor.
                 webSocket.onmessage = function(message){processOnMessage(message);};	
             }
                         
-            function processOnOpen(message){              
+            function processOnOpen(message){                            
               document.getElementById("titulo").innerHTML = "Conectou";
-              document.getElementById("textRename").value;
+              document.getElementById("textRename").value;              
             }
             
             function processOnMessage(message){                                
-//                textArea.value += message.data;
-                var str = message.data;                                
-                console.log(str);
-//                if (!str.search("mensagem")) {
-//                    textArea.value += "É mensagem";
-//                }
-//                if (!str.search("users")) {
-//                    document.getElementById("usersInfo").innerHTML = str.users;
-//                    var js = JSON.parse(str); 
-//                    console.log(js);
-//                }
-                textArea.value += str;                
-            }
+                var json = JSON.parse(message.data);
+                console.log(json.mensagem);                                                                 
+                textArea.value += json.mensagem;                
+                console.log(json.salas);
+                var bodyTable;
+                json.salas.forEach(function(element){
+                    bodyTable += "<tr><td>"+ element +"</td><td>4</td></tr>";
+                });
+                document.getElementById("bodyTable").innerHTML = bodyTable;
+            }                            
                                  
             function sendMessage(){                
                 webSocket.send(textMessage.value);                
@@ -95,6 +103,7 @@ and open the template in the editor.
                 document.getElementById("form_conversation").style.visibility = 'hidden';
                 document.getElementById("form_rename").style.visibility = 'hidden';
                 textArea.value = ""; 
+                document.getElementById("bodyTable").innerHTML = "";
             }
         </script>
     
