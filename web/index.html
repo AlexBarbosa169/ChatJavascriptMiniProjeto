@@ -23,16 +23,13 @@ and open the template in the editor.
                 <input onclick="connect()" value="Conectar" type="button">                
             </form>
     </div>                
-    
-    <div id="form_rename" class="nav-bar" style="visibility: hidden">
-            <form id="form">                            
-                Novo nome <input id="textRename" type="text">                
-                <input onclick="rename();" value="Renomear" type="button">                   
-                <input onclick="disconect();" value="Desconectar" type="button">                            
-            </form>
-    </div>                
-    
+                                    
     <div id="form_conversation" class="container" style="visibility: hidden">                
+        <form id="form_rename" >                            
+            Novo nome <input id="textRename" type="text">                
+            <input onclick="rename();" value="Renomear" type="button">                   
+            <input onclick="disconect();" value="Desconectar" type="button" style="float: right">                            
+        </form>
             <h1 id="titulo"></h1>
             <p id="usersInfo">Número de usuários na sala</p>
             <textarea id="messageTextArea" style="width: inherit; height: 300px " ></textarea>        
