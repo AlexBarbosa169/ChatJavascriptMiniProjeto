@@ -115,6 +115,18 @@ public class EndPoint {
 
     @OnClose
     public void onClose(Session ses) {
+        String user = (String) ses.getUserProperties().get("name");
         salas.get(ses.getUserProperties().get("sala")).remove(ses);
+        Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
+            while (iterator.hasNext()) {
+                Session s = iterator.next();                        
+    //            String st = gson.toJson(str);            
+                try {                        
+                    s.getBasicRemote().sendText(user + " saiu!\n");
+                } catch (IOException ex) {
+                    Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
-}
+
