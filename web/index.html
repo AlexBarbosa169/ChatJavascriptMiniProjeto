@@ -23,19 +23,19 @@ and open the template in the editor.
                 <input onclick="connect()" value="Conectar" type="button">                
             </form>
     </div>                
-    <div id="form_rename" class="container" style="visibility: hidden">
+    
+    <div id="form_rename" class="nav-bar" style="visibility: hidden">
             <form id="form">                            
                 Novo nome <input id="textRename" type="text">                
-                <input onclick="rename();" value="Renomear" type="button">            
+                <input onclick="rename();" value="Renomear" type="button">                   
+                <input onclick="disconect();" value="Desconectar" type="button">                            
             </form>
     </div>                
-    <div id="form_conversation" class="container" style="visibility: hidden">
-            <form id="form">                            
-                <input onclick="disconect();" value="Desconectar" type="button">                
-            </form>    
+    
+    <div id="form_conversation" class="container" style="visibility: hidden">                
             <h1 id="titulo"></h1>
             <p id="usersInfo">Número de usuários na sala</p>
-            <textarea id="messageTextArea"></textarea>        
+            <textarea id="messageTextArea" style="width: inherit; height: 300px " ></textarea>        
             <form class="form">
                 <input id="textMessage" type="text">                        
                 <input onclick="sendMessage();" value="Enviar Mensagem" type="button">            
@@ -63,8 +63,7 @@ and open the template in the editor.
                 webSocket.onmessage = function(message){processOnMessage(message);};	
             }
                         
-            function processOnOpen(message){
-              textArea.value += "Conectou";                                                                           
+            function processOnOpen(message){              
               document.getElementById("titulo").innerHTML = "Conectou";
               document.getElementById("textRename").value;
             }
@@ -85,7 +84,7 @@ and open the template in the editor.
             }
                                  
             function sendMessage(){                
-                webSocket.send("rename teste");                
+                webSocket.send(textMessage.value);                
             }
             
             function rename(){

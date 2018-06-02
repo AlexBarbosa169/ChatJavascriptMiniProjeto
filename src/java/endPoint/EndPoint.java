@@ -71,7 +71,7 @@ public class EndPoint {
       for (Session s : salas.get(sala)) {
                 try {      
 //                s.getBasicRemote().sendText("usersInfo" + "Quantidade de usuários: " + chatUsers.size());                            
-                        s.getBasicRemote().sendText(ses.getUserProperties().get("name") + " conectou" + ", na sala "+ses.getUserProperties().get("sala") );                        
+                        s.getBasicRemote().sendText(ses.getUserProperties().get("name") + " conectou" + ", na sala "+ses.getUserProperties().get("sala")+"\n" );                        
                 } catch (IOException ex) {
                     Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -91,8 +91,8 @@ public class EndPoint {
         if(message.contains("rename")){
             String[] split = message.split(" ");    
             ses.getUserProperties().put("name", split[1]);
-            ses.getBasicRemote().sendText(split[1]);
-        }                
+            ses.getBasicRemote().sendText("Seu novo nome de usuário eh "+ses.getUserProperties().get("name")+"\n");
+        }else{
             
 //        Gson gson = new Gson();        
 //        String str = gson.toJson(ses.getUserProperties());
@@ -100,13 +100,14 @@ public class EndPoint {
 
 
         Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
-        while (iterator.hasNext()) {
-            Session s = iterator.next();                        
-//            String st = gson.toJson(str);            
-            try {                        
-                s.getBasicRemote().sendText("Chegou mensagem");
-            } catch (IOException ex) {
-                Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
+            while (iterator.hasNext()) {
+                Session s = iterator.next();                        
+    //            String st = gson.toJson(str);            
+                try {                        
+                    s.getBasicRemote().sendText("Usuário: "+ ses.getUserProperties().get("name")+" hora: "+ df.format(cal.getTime()) +" Mensagem: " + message + "\n");
+                } catch (IOException ex) {
+                    Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
         return null;
