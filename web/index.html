@@ -9,102 +9,121 @@ and open the template in the editor.
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        
+
         <title>Página Pricipal do chat</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">       
     </head>
     <h1 id="titulo">Conecte-se</h1>
     <div id="form_login" class="container" style="visibility: visible">
-            <form id="form">            
-                Url <input id="textUrl" type="text" value="ws://localhost:8080/ChatWebJavaJavascript/endpoint/">
-                Seu Nome de Usuário <input id="textRoon" type="text" value="geral">
-                Usuário <input id="textUser" type="text" value="visitante">
-                <input onclick="connect()" value="Conectar" type="button">                
-            </form>
+        <form id="form">            
+            Url <input id="textUrl" type="text" value="ws://localhost:8080/ChatWebJavaJavascript/endpoint/">
+            Seu Nome de Usuário <input id="textRoon" type="text" value="geral">
+            Usuário <input id="textUser" type="text" value="visitante">
+            <input onclick="connect()" value="Conectar" type="button">                
+        </form>
     </div>                
-                                    
+
     <div id="form_conversation" class="container" style="visibility: hidden">                
         <form id="form_rename" >                            
             Novo nome <input id="textRename" type="text">                
             <input onclick="rename();" value="Renomear" type="button">                   
             <input onclick="disconect();" value="Desconectar" type="button" style="float: right">                            
-        </form>            
-            <p id="usersInfo">Número de usuários na sala</p>
-            <textarea id="messageTextArea" style="height: 300px;width: 400px; float: left "></textarea>        
-            <table  style="width: 300px; border: solid 1px; float: left">
-                <thead>
-                    <tr>
-                        <th>Sala</th>
-                        <th>Qtd Usuários na sala</th>
-                    </tr>
-                </thead>
-                <tbody id="bodyTable">                    
-                    
-                </tbody>
-            </table>
-            <form class="form" style="clear: both">
-                <input id="textMessage" type="text" autocomplete="off">                        
-                <input onclick="sendMessage();" value="Enviar Mensagem" type="button">            
-            </form>                
+        </form>                        
+        <textarea id="messageTextArea" style="height: 300px;width: 400px; float: left "></textarea>        
+        <table  style="width: 300px; border: solid 2px; float: left">
+            <thead>
+                <tr>
+                    <th>Sala</th>                    
+                </tr>
+            </thead>
+            <tbody id="bodyTable">                  
+            </tbody>
+        </table>
+        <form class="form" style="clear: both">
+            <input id="textMessage" type="text" autocomplete="off">                                    
+            <select id="select">                
+                <option>teste</option>
+            </select>
+            <input onclick="sendMessage();" value="Enviar Mensagem" type="button">            
+        </form>                
+    </div>        
 
-    </div>
-        
-                        
-        <script type="text/javascript">            
+    <script type="text/javascript">
 //        Teste para conexão
-            var webSocket;
-            var textArea = document.getElementById("messageTextArea");            
-            var textMessage = document.getElementById("textMessage");            
-            var textUrl = document.getElementById("textUrl");
-            var textRoon = document.getElementById("textRoon");
-            var textUser = document.getElementById("textUser");
-            var sala = "geral";
-            function connect(){
-//                console.log(document.getElementById("textUser").value);                           
-//                webSocket = new WebSocket("ws://localhost:8080/ChatWebJavaJavascript/endpoint/geral/"+textUser.value);
-                webSocket = new WebSocket(textUrl.value + textRoon.value +"/"+textUser.value);
-                document.getElementById("form_login").style.visibility = 'hidden'; 
-                document.getElementById("form_conversation").style.visibility = 'visible';                
-                document.getElementById("form_rename").style.visibility = 'visible';
-                webSocket.onopen = function(message){processOnOpen(message);};
-                webSocket.onmessage = function(message){processOnMessage(message);};	
+        var webSocket;
+        var textArea = document.getElementById("messageTextArea");
+        var textMessage = document.getElementById("textMessage");
+        var textUrl = document.getElementById("textUrl");
+        var textRoon = document.getElementById("textRoon");
+        var textUser = document.getElementById("textUser");
+        var sala = "geral";
+
+        function connect() {
+            webSocket = new WebSocket(textUrl.value + textRoon.value + "/" + textUser.value);
+            document.getElementById("form_login").style.visibility = 'hidden';
+            document.getElementById("form_conversation").style.visibility = 'visible';
+            document.getElementById("form_rename").style.visibility = 'visible';
+            webSocket.onopen = function (message) {
+                processOnOpen(message);
+            };
+            webSocket.onmessage = function (message) {
+                processOnMessage(message);
+            };
+        }
+
+        function processOnOpen(message) {
+            document.getElementById("titulo").innerHTML = "Conectou";
+            document.getElementById("textRename").value;
+        }
+
+        function processOnMessage(message) {
+            var json = JSON.parse(message.data);
+            var borytable = "";            
+            var option;
+            console.log("Esse é o " + json);
+            for (var a in json) {
+                console.log(a);
+                if (a === "mensagem") {
+                    textArea.value += json.mensagem;
+                } else {
+                    if (json[a] === "user") {
+                        console.log(a)
+                        option += "<option>" + a + "</option>";
+                    } else {
+                        borytable += "<tr><td>" + json[a] + "</td></tr>";
+                    }
+                }
+                if (borytable) {
+                    document.getElementById("bodyTable").innerHTML = borytable;
+                }
+                if (option) {
+                    document.getElementById("select").innerHTML = "<option>geral</option>" + option;
+                }
             }
-                        
-            function processOnOpen(message){                            
-              document.getElementById("titulo").innerHTML = "Conectou";
-              document.getElementById("textRename").value;              
+        }
+        function sendMessage() {
+            var userSelected = document.getElementById("select").value;
+            if (userSelected === 'geral') {
+                webSocket.send("send " + textMessage.value);
+            } else {
+                webSocket.send("send -u " + userSelected + " " + textMessage.value);
             }
-            
-            function processOnMessage(message){                                
-                var json = JSON.parse(message.data);
-                console.log(json.mensagem);                                                                 
-                textArea.value += json.mensagem;                
-                console.log(json.salas);
-                var bodyTable;
-                json.salas.forEach(function(element){
-                    bodyTable += "<tr><td>"+ element +"</td><td>4</td></tr>";
-                });
-                document.getElementById("bodyTable").innerHTML = bodyTable;
-            }                            
-                                 
-            function sendMessage(){                
-                webSocket.send(textMessage.value);                
-            }
-            
-            function rename(){
-                webSocket.send("rename "+ document.getElementById("textRename").value);                
-                console.log("Foi");
-            }
-            
-            function disconect(){
-                webSocket.close();
-                document.getElementById("form_login").style.visibility = "visible";   
-                document.getElementById("form_conversation").style.visibility = 'hidden';
-                document.getElementById("form_rename").style.visibility = 'hidden';
-                textArea.value = ""; 
-                document.getElementById("bodyTable").innerHTML = "";
-            }
-        </script>
-    
+        }
+
+        function rename() {
+            webSocket.send("rename " + document.getElementById("textRename").value);
+            console.log("Foi");
+        }
+
+        function disconect() {
+            webSocket.close();
+            document.getElementById("form_login").style.visibility = "visible";
+            document.getElementById("form_conversation").style.visibility = 'hidden';
+            document.getElementById("form_rename").style.visibility = 'hidden';
+            textArea.value = "";
+//                document.getElementById("bodyTable").innerHTML = "";
+        }
+    </script>
+
 </html>
