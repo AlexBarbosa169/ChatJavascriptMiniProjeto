@@ -17,7 +17,7 @@ and open the template in the editor.
     <h1 id="titulo">Conecte-se</h1>
     <div id="form_login" class="container" style="visibility: visible">
         <form id="form">            
-            Url <input id="textUrl" type="text" value="ws://localhost:8080/pd/endpoint/">
+            Url <input id="textUrl" type="text" value="ws://localhost:8080/ChatJavascriptMiniProjeto/endpoint/">
             Sala: <input id="textRoon" type="text" value="geral">
             Usuário: <input id="textUser" type="text" value="visitante">
             <input onclick="connect()" value="Conectar" type="button">                
@@ -91,8 +91,14 @@ and open the template in the editor.
                         console.log(a)
                         option += "<option>" + a + "</option>";
                     } else {
-                        bodytable += "<tr><td>" + json['userList'] + "</td></tr><br>";
-                        console.log(bodytable)
+                        var usuarios = json['userList'];
+                        var size = usuarios.length;
+                        console.log(usuarios);
+                        for(i = 0; i < size; i++){
+                            bodytable += "<tr><td>" + usuarios[i] + "</td></tr>";
+                            option += "<option>" + usuarios[i] + "</option>";
+                        }
+                        console.log(bodytable);
                     }
                 }
                 if (bodytable) {
