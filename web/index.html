@@ -17,9 +17,9 @@ and open the template in the editor.
     <h1 id="titulo">Conecte-se</h1>
     <div id="form_login" class="container" style="visibility: visible">
         <form id="form">            
-            Url <input id="textUrl" type="text" value="ws://localhost:8080/ChatWebJavaJavascript/endpoint/">
-            Seu Nome de Usuário <input id="textRoon" type="text" value="geral">
-            Usuário <input id="textUser" type="text" value="visitante">
+            Url <input id="textUrl" type="text" value="ws://localhost:8080/pd/endpoint/">
+            Sala: <input id="textRoon" type="text" value="geral">
+            Usuário: <input id="textUser" type="text" value="visitante">
             <input onclick="connect()" value="Conectar" type="button">                
         </form>
     </div>                
@@ -79,9 +79,9 @@ and open the template in the editor.
 
         function processOnMessage(message) {
             var json = JSON.parse(message.data);
-            var borytable = "";            
+            var bodytable = "";            
             var option;
-            console.log("Esse é o " + json);
+            console.log("Esse é o " + json['mensagem']);
             for (var a in json) {
                 console.log(a);
                 if (a === "mensagem") {
@@ -91,11 +91,12 @@ and open the template in the editor.
                         console.log(a)
                         option += "<option>" + a + "</option>";
                     } else {
-                        borytable += "<tr><td>" + json[a] + "</td></tr>";
+                        bodytable += "<tr><td>" + json['userList'] + "</td></tr><br>";
+                        console.log(bodytable)
                     }
                 }
-                if (borytable) {
-                    document.getElementById("bodyTable").innerHTML = borytable;
+                if (bodytable) {
+                    document.getElementById("bodyTable").innerHTML = bodytable;
                 }
                 if (option) {
                     document.getElementById("select").innerHTML = "<option>geral</option>" + option;
@@ -103,7 +104,7 @@ and open the template in the editor.
             }
         }
         function sendMessage() {
-            var userSelected = document.getElementById("select").value;
+            var userSelected = document.getElementById("select").value; 
             if (userSelected === 'geral') {
                 webSocket.send("send " + textMessage.value);
             } else {

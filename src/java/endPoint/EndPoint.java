@@ -6,23 +6,25 @@
 package endPoint;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
-import javax.websocket.server.ServerEndpoint;
-import com.google.gson.Gson;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
 import javax.websocket.server.PathParam;
+import javax.websocket.server.ServerEndpoint;
+
+import com.google.gson.Gson;
 
 /**
  *
@@ -32,7 +34,9 @@ import javax.websocket.server.PathParam;
 public class EndPoint {
 
 //    static List<Session> chatUsers = Collections.synchronizedList(new ArrayList<Session>());
-    static HashMap<String, List<Session>> salas = new HashMap<>();    
+    static HashMap<String, List<Session>> salas = new HashMap<>();
+    
+    static List<String> listaUsers = Collections.synchronizedList(new ArrayList<>());
     
     @OnOpen
     public void onOpen(Session ses, @PathParam("sala") String sala, @PathParam("usuario") String user) {        
@@ -62,7 +66,7 @@ public class EndPoint {
         List<String> upRoonAdd = new ArrayList<>();
         upRoonAdd.addAll(salas.keySet());                
         
-        Mensagem m = new Mensagem(ses.getUserProperties().get("name")+" conectou");        
+        Mensagem m = new Mensagem(ses.getUserProperties().get("name")+" entrou na sala\n");        
                 
         for(String t : upRoonAdd){
             for(Session session : salas.get(t)) {
@@ -74,16 +78,17 @@ public class EndPoint {
             }                            
         }
         
-        HashMap<String,String> teste2 = new HashMap<>();        
+        listaUsers.add((String) ses.getUserProperties().get("name"));
         
-       for(Session usu: salas.get(sala)){
-           teste2.put((String) usu.getUserProperties().get("name") , "user");
-       } 
+        m.userList = listaUsers;
+
         
+//       for(Session usu: salas.get(sala)){
+//       } 
+//        
         for(Session session : salas.get(sala)) {                            
             try {                
-                session.getBasicRemote().sendText(gson.toJson(m));
-                session.getBasicRemote().sendText(gson.toJson(teste2));                
+                session.getBasicRemote().sendText(gson.toJson(m));                
             } catch (IOException ex) {
                 Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -112,16 +117,14 @@ public class EndPoint {
                 }                
             }
             ses.getUserProperties().put("name", newUser);
-            m = new Mensagem("Seu novo nome de usuário eh " + ses.getUserProperties().get("name") + "\n");
+            m = new Mensagem("Seu novo nome de usuário é " + ses.getUserProperties().get("name") + "\n");
             ses.getBasicRemote().sendText(gson.toJson(m));
         } else {                        
             Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
             if (key.contains("send")) {
-                m = new Mensagem("Usuário: " + ses.getUserProperties().get("name") +
-                        " hora: " + df.format(cal.getTime()) + " Mensagem: " + split[1] + "\n");
+                m = new Mensagem(df.format(cal.getTime()) + " " + ses.getUserProperties().get("name") + ": " + split[1] + "\n");
                if(split[1].contains("-u")){                
-                   m = new Mensagem("Usuário: " + ses.getUserProperties().get("name") +
-                        " hora: " + df.format(cal.getTime()) + " Mensagem: " + split[3] + "\n");
+                   m = new Mensagem(df.format(cal.getTime()) + " " + ses.getUserProperties().get("name") + ": " + split[3] + "\n");
                     while (iterator.hasNext()) {
                         Session s = iterator.next();  
                         if(s.getUserProperties().get("name").equals(split[2])){
@@ -149,36 +152,43 @@ public class EndPoint {
     }
     
     @OnClose
-    public void onClose(Session ses) {
+    public void onClose(Session ses) throws IOException {
         String user = (String) ses.getUserProperties().get("name");
         String sala = (String) ses.getUserProperties().get("sala");
+        Mensagem m = new Mensagem();
+        Gson gson = new Gson();
+        
         salas.get(sala).remove(ses);
         if (salas.get(sala).isEmpty()) {
+            listaUsers.clear();
+            m.userList = listaUsers;
             salas.remove(sala);
-        }
+            
+        } else {
+        
         Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
         
-        Gson gson = new Gson();        
+                
         List<String> upRoomRemoved = new ArrayList<>();
         upRoomRemoved.addAll(salas.keySet());                
         
-        Mensagem m = new Mensagem(user + " saiu!" + "\n");
+         m.setMensagem(user + " saiu!" + "\n");
+                       
         
-        HashMap<String,String> upUserRemoved = new HashMap<>();                
         for(Session usu: salas.get(sala)){
-           upUserRemoved.put((String) usu.getUserProperties().get("name") , "user");
+        listaUsers.remove((String) ses.getUserProperties().get("name"));
+        m.userList = listaUsers;
         }
         
         while (iterator.hasNext()) {
             Session s = iterator.next();
-            //            String st = gson.toJson(str);            
+            
             try {                
                 s.getBasicRemote().sendText(gson.toJson(m));
-                s.getBasicRemote().sendText(gson.toJson(upRoomRemoved));
-                s.getBasicRemote().sendText(gson.toJson(upUserRemoved));
             } catch (IOException ex) {
                 Logger.getLogger(EndPoint.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
+  }
 }
