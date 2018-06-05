@@ -109,6 +109,11 @@ public class EndPoint {
         String[] split = message.split(" ");
         String key = split[0];
         
+        String publicMessage = message.substring(4);
+        
+        String privateMessage = message.substring(7); 
+       
+        
         if (key.contains("rename")) {                 
             String newUser = "";
             for(String s : split){
@@ -122,9 +127,11 @@ public class EndPoint {
         } else {                        
             Iterator<Session> iterator = salas.get(ses.getUserProperties().get("sala")).iterator();
             if (key.contains("send")) {
-                m = new Mensagem(df.format(cal.getTime()) + " " + ses.getUserProperties().get("name") + ": " + split[1] + "\n");
-               if(split[1].contains("-u")){                
-                   m = new Mensagem(df.format(cal.getTime()) + " " + ses.getUserProperties().get("name") + ": " + split[3] + "\n");
+                m = new Mensagem(df.format(cal.getTime()) + " " + ses.getUserProperties().get("name") + ": " + publicMessage + "\n");
+               if(split[1].contains("-u")){
+                   if(privateMessage.contains(split[2]))
+                       privateMessage = privateMessage.replace(split[2], "");
+                   m = new Mensagem(df.format(cal.getTime()) + " " + ses.getUserProperties().get("name") + ": " + privateMessage.trim() + "\n");
                     while (iterator.hasNext()) {
                         Session s = iterator.next();  
                         if(s.getUserProperties().get("name").equals(split[2])){
